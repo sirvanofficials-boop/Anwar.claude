@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chest Workout Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-card: #161616;
+      --accent-gold: #f5a623;
+      --accent-orange: #e8621a;
+      --text-primary: #ffffff;
+      --text-secondary: #999999;
+      --success: #4caf50;
+      --border: #252525;
+      --border-light: #2e2e2e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      background: var(--bg-secondary);
+      border-bottom: 2px solid var(--accent-gold);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      gap: 12px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+    }
+    .nav-title {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--accent-gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-tab {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .nav-tab.active {
+      background: var(--accent-gold);
+      color: #000;
+      border-color: var(--accent-gold);
+    }
+    .nav-tab:hover:not(.active) {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-strip {
+      background: var(--bg-secondary);
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      height: 5px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-gold));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 22px 18px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1c1008 0%, #1a1a1a 60%, #0a0a0a 100%);
+      border: 1px solid rgba(245,166,35,0.4);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -10%;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-title {
+      font-size: 2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+    .hero-subtitle {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+    .hero-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    .hero-meta {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 580px) {
+      .hero-meta { grid-template-columns: repeat(3, 1fr); }
+    }
+    .meta-item {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .meta-icon { font-size: 1.2rem; margin-bottom: 3px; }
+    .meta-label { font-size: 0.62rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; }
+    .meta-value { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+
+    /* ── SESSION SUMMARY ── */
+    .session-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .summary-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .summary-item .val {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--accent-gold);
+      line-height: 1;
+    }
+    .summary-item .lbl {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--accent-gold);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light);
+    }
+
+    /* ── EXERCISE LIST ── */
+    .exercise-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+    .exercise-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .exercise-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+    .exercise-card:hover { border-color: rgba(245,166,35,0.5); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245,166,35,0.08); }
+    .exercise-card:hover::before { background: var(--accent-gold); }
+    .exercise-card.completed { border-color: rgba(76,175,80,0.4); }
+    .exercise-card.completed::before { background: var(--success); }
+    .ex-num {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.95rem; color: #000;
+      flex-shrink: 0;
+    }
+    .ex-info { flex: 1; min-width: 0; }
+    .ex-name { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+    .ex-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+    .ex-target-tag {
+      font-size: 0.7rem; color: var(--accent-gold); font-weight: 700;
+      background: rgba(245,166,35,0.08);
+      border: 1px solid rgba(245,166,35,0.2);
+      border-radius: 4px; padding: 2px 6px; margin-top: 5px; display: inline-block;
+    }
+    .ex-badges { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .badge {
+      background: rgba(245,166,35,0.07);
+      border: 1px solid rgba(245,166,35,0.2);
+      border-radius: 8px;
+      padding: 5px 9px;
+      text-align: center;
+      min-width: 50px;
+    }
+    .badge-num { font-size: 1rem; font-weight: 900; color: var(--accent-gold); line-height: 1; }
+    .badge-lbl { font-size: 0.58rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+    .check-circle {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+    .check-circle.done { background: var(--success); border-color: var(--success); color: #fff; }
+
+    /* ── START BTN ── */
+    .start-btn {
+      display: flex; justify-content: center; margin-top: 8px;
+    }
+    .btn-primary {
+      padding: 14px 36px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold));
+      color: #000;
+      font-weight: 900;
+      font-size: 1rem;
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(245,166,35,0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(245,166,35,0.35); }
+
+    /* ── COMPLETION BANNER ── */
+    .completion-banner {
+      background: linear-gradient(135deg, #0a1a0a, #111);
+      border: 2px solid var(--success);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .completion-banner h2 { font-size: 1.8rem; font-weight: 900; color: var(--success); text-transform: uppercase; }
+    .completion-banner p { color: var(--text-secondary); margin-top: 8px; font-size: 0.9rem; }
+
+    /* ── EXERCISE DETAIL ── */
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .back-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 9px;
+      padding: 9px 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .detail-info { flex: 1; }
+    .detail-info h2 { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; }
+    .detail-info p { font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px; }
+    .target-pill {
+      background: rgba(245,166,35,0.12);
+      border: 1px solid rgba(245,166,35,0.35);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      color: var(--accent-gold);
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── VIDEO ── */
+    .video-section {
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000;
+      margin-bottom: 22px;
+      border: 1px solid var(--border);
+      position: relative;
+      aspect-ratio: 16 / 9;
+    }
+    .video-section iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .video-placeholder {
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #111 0%, #0a0a0a 100%);
+      cursor: pointer;
+      transition: background 0.2s;
+      gap: 12px;
+    }
+    .video-placeholder:hover { background: linear-gradient(135deg, #1a1a1a 0%, #111 100%); }
+    .play-btn {
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      color: #000;
+      transition: transform 0.2s;
+      box-shadow: 0 4px 20px rgba(245,166,35,0.4);
+    }
+    .video-placeholder:hover .play-btn { transform: scale(1.08); }
+    .video-placeholder .vp-title { font-size: 1rem; font-weight: 700; color: #fff; }
+    .video-placeholder .vp-sub { font-size: 0.82rem; color: var(--text-secondary); }
+    .video-search-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 7px 16px;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+    .video-search-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* ── DETAIL GRID ── */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-gold);
+      margin-bottom: 14px;
+    }
+
+    /* ── MUSCLE SVG ── */
+    .muscle-wrap { display: flex; justify-content: center; }
+    .muscle-svg { width: 130px; height: 170px; }
+    .muscle-legend { margin-top: 14px; }
+    .leg-item { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 5px; }
+    .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── SET TRACKER ── */
+    .set-list { display: flex; flex-direction: column; gap: 8px; }
+    .set-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .set-row:hover { background: rgba(255,255,255,0.05); }
+    .set-row.done { background: rgba(76,175,80,0.08); border-color: rgba(76,175,80,0.25); }
+    .set-n {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .set-row.done .set-n { background: var(--success); }
+    .set-reps { flex: 1; font-size: 0.85rem; color: var(--text-secondary); }
+    .set-row.done .set-reps { color: var(--text-primary); }
+    .done-tag { font-size: 0.7rem; font-weight: 700; color: var(--success); }
+    .set-box {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      border: 2px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      transition: all 0.2s;
+    }
+    .set-row.done .set-box { background: var(--success); border-color: var(--success); color: #fff; }
+
+    /* ── REST TIMER ── */
+    .timer-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 18px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .timer-ring-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 12px; }
+    .timer-ring-wrap svg { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: var(--border-light); stroke-width: 9; }
+    .ring-fg { fill: none; stroke: var(--accent-gold); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+    .ring-fg.urgent { stroke: #ff4444; }
+    .ring-num {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.6rem; font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+    .timer-state { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px; min-height: 20px; }
+    .timer-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .tbtn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.82rem;
+      transition: all 0.2s;
+    }
+    .tbtn.gold { background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold)); color: #000; border: none; }
+    .tbtn:hover:not(.gold) { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .tbtn.gold:hover { opacity: 0.9; }
+
+    /* ── FORM TIPS ── */
+    .form-tips-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 22px; }
+    .tip-row { display: flex; align-items: flex-start; gap: 10px; font-size: 0.83rem; color: var(--text-secondary); line-height: 1.5; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .tip-row:last-child { border-bottom: none; }
+    .tip-arrow { color: var(--accent-gold); flex-shrink: 0; font-size: 0.7rem; margin-top: 4px; }
+
+    /* ── EXERCISE NAV ── */
+    .ex-nav { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
+    .nav-arrow {
+      flex: 1;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-arrow:hover:not(:disabled) { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .nav-arrow:disabled { opacity: 0.25; cursor: not-allowed; }
+    .nav-arrow.fwd { background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold)); border: none; color: #000; }
+    .nav-arrow.fwd:hover { opacity: 0.9; }
+    .nav-counter { font-size: 0.82rem; color: var(--text-secondary); white-space: nowrap; }
+
+    /* ── TIPS PAGE ── */
+    .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 22px; }
+    @media (max-width: 580px) { .tips-grid { grid-template-columns: 1fr; } }
+    .tip-item { display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px; }
+    .tip-ico { flex-shrink: 0; }
+
+    /* ── SCHEDULE TABLE ── */
+    .sched-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .sched-row:last-child { border-bottom: none; }
+    .sched-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.82rem; color: #000; flex-shrink: 0;
+    }
+    .sched-name { flex: 1; font-size: 0.9rem; font-weight: 600; }
+    .sched-target { font-size: 0.72rem; color: var(--text-secondary); }
+    .sched-sets { color: var(--accent-gold); font-weight: 800; font-size: 0.9rem; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.28s ease; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+
+    @media (max-width: 480px) {
+      .nav { flex-direction: column; gap: 10px; padding: 12px; }
+      .hero-title { font-size: 1.5rem; }
+      .detail-header { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const EXERCISES = [
+  {
+    id: 1,
+    name: 'Barbell Bench Press',
+    desc: 'The classic mass builder. Focus on progressive overload.',
+    sets: 4, reps: '6–8',
+    target: 'Upper & Mid Chest',
+    muscle: 'upper-mid',
+    searchQuery: 'barbell bench press proper form tutorial',
+    tips: [
+      'Retract & depress your shoulder blades before lifting',
+      'Plant your feet firmly and maintain a slight arch in your lower back',
+      'Control the descent — 2–3 seconds down for maximum tension',
+      'Grip slightly wider than shoulder-width; elbows at ~75° to torso'
+    ]
+  },
+  {
+    id: 2,
+    name: 'Incline Dumbbell Press',
+    desc: 'Targets the upper chest for thickness and fullness.',
+    sets: 4, reps: '8–10',
+    target: 'Upper Chest',
+    muscle: 'upper',
+    searchQuery: 'incline dumbbell press proper form tutorial',
+    tips: [
+      'Set the bench at 30–45° — higher angles shift work to shoulders',
+      'Press dumbbells in a slight inward arc, not straight up',
+      'Full stretch at the bottom, hard squeeze at the top',
+      'Keep elbows slightly tucked to protect the shoulder joint'
+    ]
+  },
+  {
+    id: 3,
+    name: 'Decline Barbell Press',
+    desc: 'Builds lower chest thickness and adds depth.',
+    sets: 3, reps: '8–12',
+    target: 'Lower Chest',
+    muscle: 'lower',
+    searchQuery: 'decline barbell bench press proper form tutorial',
+    tips: [
+      'Decline bench at 15–30° below horizontal for optimal lower chest activation',
+      'Keep wrists straight — avoid letting them bend back under load',
+      'Do NOT bounce the bar off your chest; brief controlled pause instead',
+      'Secure your legs before unracking — safety first!'
+    ]
+  },
+  {
+    id: 4,
+    name: 'Dumbbell Flys',
+    desc: 'Stretches and isolates the chest for separation.',
+    sets: 3, reps: '10–12',
+    target: 'Inner Chest',
+    muscle: 'inner',
+    searchQuery: 'dumbbell chest flys proper form tutorial',
+    tips: [
+      'Maintain a soft, fixed bend in the elbows throughout the entire rep',
+      'Let the stretch happen slowly — that is where the growth stimulus is',
+      'Bring the dumbbells together at the top and hold for 1 second',
+      'This is an isolation exercise — keep weight moderate, prioritize feel'
+    ]
+  },
+  {
+    id: 5,
+    name: 'Cable Crossover',
+    desc: 'Finishing move for a defined, sculpted chest.',
+    sets: 3, reps: '12–15',
+    target: 'Inner Chest',
+    muscle: 'inner',
+    searchQuery: 'cable crossover chest exercise proper form tutorial',
+    tips: [
+      'Cables maintain constant tension — take advantage by squeezing hard at the end',
+      'Slight forward lean from the hips gives a better stretch at the top',
+      'Cross your hands at the bottom for peak contraction — alternate which hand is on top',
+      'Slow, controlled return is half the rep — do not let the weight yank you back'
+    ]
+  }
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  view: 'dashboard',      // dashboard | exercise | tips
+  currentEx: 0,
+  completedSets: {},      // { id: Set<index> }
+  timerInterval: null,
+  timerSec: 75,
+  timerMax: 75,
+  timerRunning: false,
+  videoOpen: {}           // { id: boolean }
+};
+EXERCISES.forEach(ex => { state.completedSets[ex.id] = new Set(); state.videoOpen[ex.id] = false; });
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+const totalSets = () => EXERCISES.reduce((s, e) => s + e.sets, 0);
+const doneSets  = () => Object.values(state.completedSets).reduce((s, v) => s + v.size, 0);
+const exDone    = id  => state.completedSets[id].size >= EXERCISES.find(e => e.id === id).sets;
+const nextIncomplete = () => { for (let i = 0; i < EXERCISES.length; i++) if (!exDone(EXERCISES[i].id)) return i; return 0; };
+const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+
+function toggleSet(exId, idx) {
+  const s = state.completedSets[exId];
+  s.has(idx) ? s.delete(idx) : s.add(idx);
+  render();
+}
+
+// ── TIMER ────────────────────────────────────────────────────────────────────
+function startTimer(sec) {
+  stopTimer();
+  state.timerSec = sec;
+  state.timerMax = sec;
+  state.timerRunning = true;
+  state.timerInterval = setInterval(() => {
+    state.timerSec--;
+    if (state.timerSec <= 0) { stopTimer(); beep(); }
+    updateTimerDOM();
+  }, 1000);
+  render();
+}
+function stopTimer() {
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+  state.timerRunning = false;
+}
+function resetTimer() { stopTimer(); state.timerSec = state.timerMax; render(); }
+function updateTimerDOM() {
+  const el = id => document.getElementById(id);
+  if (!el('t-num')) return;
+  const urgent = state.timerSec <= 10;
+  const circ = 2 * Math.PI * 56;
+  const off  = circ * (1 - state.timerSec / state.timerMax);
+  el('t-num').textContent  = fmt(state.timerSec);
+  el('t-ring').style.strokeDashoffset = off;
+  el('t-ring').className   = 'ring-fg' + (urgent ? ' urgent' : '');
+  el('t-num').style.color  = urgent ? '#ff4444' : 'var(--text-primary)';
+  el('t-state').textContent = state.timerRunning
+    ? (urgent ? '⚡ Almost there!' : '⏳ Resting…')
+    : (state.timerSec < state.timerMax ? '⏸ Paused' : '✅ Ready for next set');
+}
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.22, 0.44].forEach(t => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.3, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.18);
+      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.18);
+    });
+  } catch(e) {}
+}
+
+// ── MUSCLE SVG ───────────────────────────────────────────────────────────────
+function muscleSVG(group) {
+  const cfg = {
+    'upper-mid': { u:'#f5a623', m:'#e8621a', l:'#2a2a2a', i:'#3a3a3a' },
+    'upper':     { u:'#f5a623', m:'#2a2a2a', l:'#2a2a2a', i:'#2a2a2a' },
+    'lower':     { u:'#2a2a2a', m:'#333',    l:'#f5a623', i:'#2a2a2a' },
+    'inner':     { u:'#2a2a2a', m:'#333',    l:'#2a2a2a', i:'#f5a623' },
+  };
+  const c = cfg[group] || cfg['upper-mid'];
+  return `<svg viewBox="0 0 120 168" class="muscle-svg" xmlns="http://www.w3.org/2000/svg">
+    <!-- Head -->
+    <ellipse cx="60" cy="22" rx="17" ry="19" fill="#1e1e1e" stroke="#333" stroke-width="1.2"/>
+    <!-- Neck -->
+    <rect x="54" y="38" width="12" height="10" rx="4" fill="#1e1e1e" stroke="#333" stroke-width="1.2"/>
+    <!-- Torso -->
+    <path d="M32 46 Q22 65 24 100 L96 100 Q98 65 88 46 Z" fill="#1e1e1e" stroke="#333" stroke-width="1.2"/>
+    <!-- Left pec upper -->
+    <path d="M36 50 Q46 46 57 50 Q58 64 54 69 Q43 72 36 65 Z" fill="${c.u}" opacity="0.95"/>
+    <!-- Right pec upper -->
+    <path d="M84 50 Q74 46 63 50 Q62 64 66 69 Q77 72 84 65 Z" fill="${c.u}" opacity="0.95"/>
+    <!-- Left pec mid -->
+    <path d="M36 65 Q43 72 54 69 Q56 80 50 85 Q40 86 33 78 Z" fill="${c.m}" opacity="0.9"/>
+    <!-- Right pec mid -->
+    <path d="M84 65 Q77 72 66 69 Q64 80 70 85 Q80 86 87 78 Z" fill="${c.m}" opacity="0.9"/>
+    <!-- Left pec lower -->
+    <path d="M33 78 Q40 86 50 85 Q51 92 45 94 Q35 92 31 84 Z" fill="${c.l}" opacity="0.85"/>
+    <!-- Right pec lower -->
+    <path d="M87 78 Q80 86 70 85 Q69 92 75 94 Q85 92 89 84 Z" fill="${c.l}" opacity="0.85"/>
+    <!-- Inner / sternum highlight -->
+    <line x1="60" y1="49" x2="60" y2="93" stroke="${c.i}" stroke-width="4" opacity="0.85"/>
+    <path d="M57 50 Q60 49 60 52 L60 91 Q56 88 54 69 Z" fill="${c.i}" opacity="0.5"/>
+    <path d="M63 50 Q60 49 60 52 L60 91 Q64 88 66 69 Z" fill="${c.i}" opacity="0.5"/>
+    <!-- Arms -->
+    <ellipse cx="18" cy="74" rx="9" ry="24" fill="#1e1e1e" stroke="#333" stroke-width="1.2"/>
+    <ellipse cx="102" cy="74" rx="9" ry="24" fill="#1e1e1e" stroke="#333" stroke-width="1.2"/>
+    <!-- Abdomen -->
+    <path d="M44 96 Q60 99 76 96 L74 134 Q60 137 46 134 Z" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+    <line x1="60" y1="96" x2="60" y2="134" stroke="#252525" stroke-width="1.5"/>
+    <line x1="44" y1="109" x2="76" y2="109" stroke="#252525" stroke-width="1"/>
+    <line x1="44" y1="122" x2="76" y2="122" stroke="#252525" stroke-width="1"/>
+    <!-- Legs -->
+    <rect x="40" y="134" width="16" height="26" rx="6" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+    <rect x="64" y="134" width="16" height="26" rx="6" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+  </svg>`;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const app     = document.getElementById('app');
+  const pct     = (doneSets() / totalSets()) * 100;
+  const exDoneC = EXERCISES.filter(e => exDone(e.id)).length;
+  let content;
+
+  if (state.view === 'exercise') content = renderDetail();
+  else if (state.view === 'tips') content = renderTips();
+  else content = renderDashboard(pct, exDoneC);
+
+  app.innerHTML = `
+    <nav class="nav">
+      <div class="nav-brand">
+        <span class="nav-logo">💪</span>
+        <span class="nav-title">Chest Day</span>
+      </div>
+      <div class="nav-tabs">
+        <button class="nav-tab ${state.view==='dashboard'?'active':''}" onclick="goTo('dashboard')">Workout</button>
+        <button class="nav-tab ${state.view==='exercise'?'active':''}" onclick="goTo('exercise')">Active</button>
+        <button class="nav-tab ${state.view==='tips'?'active':''}" onclick="goTo('tips')">Tips</button>
+      </div>
+    </nav>
+    <div class="progress-strip">
+      <div class="progress-info">
+        <span>${doneSets()} / ${totalSets()} sets completed</span>
+        <span>${Math.round(pct)}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="container fade-up">${content}</div>`;
+
+  if (state.view === 'exercise' && state.timerRunning) updateTimerDOM();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard(pct, exDoneC) {
+  const allDone = exDoneC === EXERCISES.length;
+  const cards = EXERCISES.map(ex => {
+    const done = exDone(ex.id);
+    const doneCount = state.completedSets[ex.id].size;
+    return `<div class="exercise-card ${done?'completed':''}" onclick="openEx(${ex.id-1})">
+      <div class="ex-num">${ex.id}</div>
+      <div class="ex-info">
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-desc">${ex.desc}</div>
+        <span class="ex-target-tag">▶ ${ex.target}</span>
+      </div>
+      <div class="ex-badges">
+        <div class="badge"><div class="badge-num">${ex.sets}</div><div class="badge-lbl">Sets</div></div>
+        <div class="badge"><div class="badge-num">${ex.reps}</div><div class="badge-lbl">Reps</div></div>
+        ${doneCount > 0 && !done ? `<div class="badge" style="border-color:rgba(76,175,80,0.35);background:rgba(76,175,80,0.07);">
+          <div class="badge-num" style="color:var(--success);font-size:0.75rem;">${doneCount}/${ex.sets}</div>
+          <div class="badge-lbl">done</div></div>` : ''}
+      </div>
+      <div class="check-circle ${done?'done':''}">${done?'✓':''}</div>
+    </div>`;
+  }).join('');
+
+  return `
+    ${allDone ? `<div class="completion-banner">
+      <div style="font-size:2.5rem;margin-bottom:10px;">🏆</div>
+      <h2>Workout Complete!</h2>
+      <p>You crushed all ${totalSets()} sets. Rest up, eat well, and grow stronger.</p>
+    </div>` : ''}
+    <div class="hero">
+      <div class="hero-title">Chest Workout</div>
+      <div class="hero-subtitle">For Size &amp; Definition</div>
+      <div class="hero-desc">Build a bigger, fuller, and well-defined chest with this proven routine.</div>
+      <div class="hero-meta">
+        <div class="meta-item"><div class="meta-icon">🎯</div><div class="meta-label">Focus</div><div class="meta-value">Growth &amp; Definition</div></div>
+        <div class="meta-item"><div class="meta-icon">📊</div><div class="meta-label">Level</div><div class="meta-value">All Levels</div></div>
+        <div class="meta-item"><div class="meta-icon">📅</div><div class="meta-label">Frequency</div><div class="meta-value">1–2× / week</div></div>
+        <div class="meta-item"><div class="meta-icon">⏱</div><div class="meta-label">Duration</div><div class="meta-value">60–75 min</div></div>
+        <div class="meta-item"><div class="meta-icon">⚡</div><div class="meta-label">Rest</div><div class="meta-value">60–90 sec</div></div>
+      </div>
+    </div>
+    <div class="session-summary">
+      <div class="summary-item"><div class="val">${exDoneC}</div><div class="lbl">Exercises Done</div></div>
+      <div class="summary-item"><div class="val">${doneSets()}</div><div class="lbl">Sets Done</div></div>
+      <div class="summary-item"><div class="val">${totalSets()-doneSets()}</div><div class="lbl">Sets Left</div></div>
+    </div>
+    <div class="section-label">⚡ Today's Exercises</div>
+    <div class="exercise-list">${cards}</div>
+    <div class="start-btn">
+      <button class="btn-primary" onclick="openEx(${nextIncomplete()})">
+        ${exDoneC===0 ? '🔥 Start Workout' : allDone ? '🔄 Do It Again' : '▶ Continue Workout'}
+      </button>
+    </div>`;
+}
+
+// ── EXERCISE DETAIL ───────────────────────────────────────────────────────────
+function renderDetail() {
+  const ex   = EXERCISES[state.currentEx];
+  const done = state.completedSets[ex.id];
+  const circ = 2 * Math.PI * 56;
+  const off  = circ * (1 - state.timerSec / state.timerMax);
+  const urgent = state.timerSec <= 10 && state.timerRunning;
+  const ysearch = encodeURIComponent(ex.searchQuery);
+
+  const setRows = Array.from({length: ex.sets}, (_, i) => {
+    const d = done.has(i);
+    return `<div class="set-row ${d?'done':''}" onclick="toggleSet(${ex.id},${i})">
+      <div class="set-n">${d?'✓':i+1}</div>
+      <div class="set-reps">Set ${i+1} &mdash; ${ex.reps} reps</div>
+      ${d ? '<span class="done-tag">DONE</span>' : ''}
+      <div class="set-box">${d?'✓':''}</div>
+    </div>`;
+  }).join('');
+
+  const tipRows = ex.tips.map(t => `<div class="tip-row"><span class="tip-arrow">▸</span><span>${t}</span></div>`).join('');
+  const videoOpen = state.videoOpen[ex.id];
+
+  return `
+    <div class="detail-header">
+      <button class="back-btn" onclick="goTo('dashboard')">← Back</button>
+      <div class="detail-info">
+        <h2>${ex.name}</h2>
+        <p>${ex.desc}</p>
+      </div>
+      <span class="target-pill">${ex.target}</span>
+    </div>
+
+    <!-- VIDEO -->
+    <div class="video-section">
+      ${videoOpen
+        ? `<iframe
+            src="https://www.youtube.com/embed/?search=${ysearch}&autoplay=1"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen></iframe>`
+        : `<div class="video-placeholder" onclick="openVideo(${ex.id})">
+            <div class="play-btn">▶</div>
+            <div class="vp-title">${ex.name}</div>
+            <div class="vp-sub">Tap to watch tutorial on YouTube</div>
+            <a class="video-search-btn"
+               href="https://www.youtube.com/results?search_query=${ysearch}"
+               target="_blank" rel="noopener"
+               onclick="event.stopPropagation()">
+              🔍 Search on YouTube
+            </a>
+           </div>`
+      }
+    </div>
+
+    <div class="detail-grid">
+      <!-- Muscle Target -->
+      <div class="card">
+        <div class="card-title">🎯 Muscle Target</div>
+        <div class="muscle-wrap">${muscleSVG(ex.muscle)}</div>
+        <div class="muscle-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--accent-gold)"></div>Primary: ${ex.target}</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#444"></div>Secondary: Front Deltoid, Triceps</div>
+        </div>
+      </div>
+
+      <!-- Set Tracker -->
+      <div class="card">
+        <div class="card-title">📋 Set Tracker — ${done.size}/${ex.sets} done</div>
+        <div class="set-list">${setRows}</div>
+      </div>
+    </div>
+
+    <!-- Rest Timer -->
+    <div class="timer-card">
+      <div class="card-title">⏱ Rest Timer (60–90 sec)</div>
+      <div class="timer-ring-wrap">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle class="ring-bg" cx="65" cy="65" r="56" stroke-dasharray="${circ}" stroke-dashoffset="0"/>
+          <circle id="t-ring" class="ring-fg ${urgent?'urgent':''}" cx="65" cy="65" r="56"
+            stroke-dasharray="${circ}" stroke-dashoffset="${off}"/>
+        </svg>
+        <div id="t-num" class="ring-num" style="color:${urgent?'#ff4444':'var(--text-primary)'}">${fmt(state.timerSec)}</div>
+      </div>
+      <div id="t-state" class="timer-state">
+        ${state.timerRunning ? (urgent?'⚡ Almost there!':'⏳ Resting…') : state.timerSec<state.timerMax ? '⏸ Paused' : '✅ Ready for next set'}
+      </div>
+      <div class="timer-btns">
+        <button class="tbtn" onclick="startTimer(60)">60 sec</button>
+        <button class="tbtn gold" onclick="${state.timerRunning?'stopTimerBtn()':'startTimer(75)'}">
+          ${state.timerRunning ? '⏸ Pause' : '▶ 75 sec'}
+        </button>
+        <button class="tbtn" onclick="startTimer(90)">90 sec</button>
+        <button class="tbtn" onclick="resetTimer()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- Form Tips -->
+    <div class="form-tips-card">
+      <div class="card-title">💡 Form Tips for ${ex.name}</div>
+      ${tipRows}
+    </div>
+
+    <!-- Prev / Next -->
+    <div class="ex-nav">
+      <button class="nav-arrow" onclick="prevEx()" ${state.currentEx===0?'disabled':''}>← Prev</button>
+      <span class="nav-counter">${state.currentEx+1} / ${EXERCISES.length}</span>
+      <button class="nav-arrow fwd" onclick="nextEx()" ${state.currentEx===EXERCISES.length-1?'disabled':''}>Next →</button>
+    </div>`;
+}
+
+// ── TIPS PAGE ─────────────────────────────────────────────────────────────────
+function renderTips() {
+  const schedRows = EXERCISES.map(ex => `
+    <div class="sched-row">
+      <div class="sched-num">${ex.id}</div>
+      <div><div class="sched-name">${ex.name}</div><div class="sched-target">${ex.target}</div></div>
+      <div class="sched-sets">${ex.sets}×${ex.reps}</div>
+    </div>`).join('');
+
+  return `
+    <div class="hero" style="margin-bottom:22px;">
+      <div class="hero-title" style="font-size:1.6rem;">Training Guide</div>
+      <div class="hero-desc">Everything you need to get the most out of chest day.</div>
+    </div>
+
+    <div class="tips-grid">
+      <div class="card">
+        <div class="card-title">🏋️ Training Tips</div>
+        <div class="tip-item"><span class="tip-ico">✅</span><span>Focus on <strong>mind-muscle connection</strong> — feel the chest contracting on every rep</span></div>
+        <div class="tip-item"><span class="tip-ico">✅</span><span>Use <strong>controlled reps</strong> and full range of motion for maximum muscle fiber recruitment</span></div>
+        <div class="tip-item"><span class="tip-ico">✅</span><span><strong>Progressive overload</strong>: add weight or reps every session, no matter how small the increase</span></div>
+        <div class="tip-item"><span class="tip-ico">✅</span><span>Eat in a <strong>slight calorie surplus</strong> to fuel muscle growth without excess fat gain</span></div>
+        <div class="tip-item"><span class="tip-ico">✅</span><span><strong>Rest &amp; recovery</strong> — muscles grow when you sleep. Aim for 7–9 hours per night</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🥗 Nutrition Tips</div>
+        <div class="tip-item"><span class="tip-ico">🥩</span><span>High protein diet: <strong style="color:var(--accent-gold)">1.6–2.2g per kg</strong> of bodyweight daily</span></div>
+        <div class="tip-item"><span class="tip-ico">🍚</span><span>Eat nutrient-dense foods: lean meats, rice, oats, eggs, sweet potatoes</span></div>
+        <div class="tip-item"><span class="tip-ico">💧</span><span>Stay hydrated — aim for <strong>3–4 L of water</strong> daily and avoid excess sugar</span></div>
+        <div class="tip-item"><span class="tip-ico">⏰</span><span><strong>Pre-workout meal</strong> 60–90 min before: complex carbs + protein (oats + eggs, rice + chicken)</span></div>
+        <div class="tip-item"><span class="tip-ico">🥤</span><span><strong>Post-workout</strong>: protein + carbs within 60 min accelerates muscle repair and glycogen refill</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">📅 Example Chest Day</div>
+    <div class="card" style="margin-bottom:22px;">
+      ${schedRows}
+      <div style="padding:16px 0 4px;text-align:center;">
+        <span style="font-weight:800;color:var(--accent-gold);font-size:0.9rem;letter-spacing:1px;">
+          CONSISTENCY + INTENSITY + NUTRITION = RESULTS 🏆
+        </span>
+      </div>
+    </div>`;
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
+function goTo(view) {
+  if (view === 'exercise') state.currentEx = state.currentEx ?? 0;
+  state.view = view;
+  render();
+}
+function openEx(idx) {
+  state.currentEx = idx;
+  state.view = 'exercise';
+  stopTimer(); state.timerSec = 75; state.timerMax = 75;
+  render();
+}
+function prevEx() { if (state.currentEx > 0) { state.currentEx--; stopTimer(); state.timerSec=75; state.timerMax=75; render(); } }
+function nextEx() { if (state.currentEx < EXERCISES.length-1) { state.currentEx++; stopTimer(); state.timerSec=75; state.timerMax=75; render(); } }
+function openVideo(exId) { state.videoOpen[exId] = true; render(); }
+function stopTimerBtn() { stopTimer(); render(); }
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
